@@ -1,9 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CalendarIcon, ScaleIcon, ChartBarIcon } from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion';
+import { CalendarIcon, ScaleIcon, ChartBarIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const weeklyProgress = [
     { day: 'Pzt', protein: 120, carbs: 200, fat: 60 },
     { day: 'Sal', protein: 100, carbs: 180, fat: 55 },
@@ -17,16 +18,27 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-secondary-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {/* Günün Antrenmanı */}
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300"
+        {/* Hızlı Erişim Butonları */}
+        <div className="flex gap-4 mb-8">
+          <button
+            onClick={() => navigate('/workout/new')}
+            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            Antrenman Ekle
+          </button>
+          <button
+            onClick={() => navigate('/nutrition/new')}
+            className="flex items-center px-4 py-2 bg-action-yellow-600 text-white rounded-lg hover:bg-action-yellow-700 focus:outline-none focus:ring-2 focus:ring-action-yellow-500"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            Öğün Ekle
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Günün Antrenmanı */}
+          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center mb-6">
               <div className="p-2 bg-primary-100 rounded-lg">
                 <CalendarIcon className="h-6 w-6 text-primary-600" />
@@ -39,25 +51,19 @@ const Dashboard: React.FC = () => {
                 { name: 'Bench Press', sets: '3 x 10' },
                 { name: 'Deadlift', sets: '5 x 5' }
               ].map((exercise, index) => (
-                <motion.div 
+                <div 
                   key={exercise.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
                   className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg"
                 >
                   <span className="font-medium text-secondary-700">{exercise.name}</span>
                   <span className="text-primary-600 font-semibold">{exercise.sets}</span>
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Makro Takibi */}
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300"
-          >
+          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center mb-6">
               <div className="p-2 bg-action-yellow-100 rounded-lg">
                 <ScaleIcon className="h-6 w-6 text-action-yellow-600" />
@@ -69,13 +75,10 @@ const Dashboard: React.FC = () => {
               <MacroProgress title="Karbonhidrat" current={150} target={250} color="bg-action-yellow-500" textColor="text-action-yellow-700" />
               <MacroProgress title="Yağ" current={45} target={70} color="bg-action-orange-500" textColor="text-action-orange-700" />
             </div>
-          </motion.div>
+          </div>
 
           {/* Motivasyon */}
-          <motion.div 
-            whileHover={{ scale: 1.02 }}
-            className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300"
-          >
+          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center mb-6">
               <div className="p-2 bg-action-orange-100 rounded-lg">
                 <ChartBarIcon className="h-6 w-6 text-action-orange-600" />
@@ -85,14 +88,10 @@ const Dashboard: React.FC = () => {
             <p className="text-lg text-secondary-600 italic text-center mt-4">
               "Başarı bir yolculuktur, varış noktası değil."
             </p>
-          </motion.div>
+          </div>
 
           {/* Haftalık Makro Grafiği */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300 md:col-span-2 lg:col-span-3"
-          >
+          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300 md:col-span-2 lg:col-span-3">
             <h2 className="text-xl font-semibold mb-6 text-primary-800">Haftalık Makro Takibi</h2>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -135,8 +134,8 @@ const Dashboard: React.FC = () => {
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -160,11 +159,9 @@ const MacroProgress: React.FC<MacroProgressProps> = ({ title, current, target, c
         <span className={`font-semibold ${textColor}`}>{current}/{target}g</span>
       </div>
       <div className="w-full bg-secondary-100 rounded-full h-2.5 overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.min(percentage, 100)}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className={`${color} rounded-full h-2.5`}
+        <div
+          style={{ width: `${Math.min(percentage, 100)}%` }}
+          className={`${color} rounded-full h-2.5 transition-all duration-1000 ease-out`}
         />
       </div>
     </div>

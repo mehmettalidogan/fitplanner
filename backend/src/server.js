@@ -1,14 +1,13 @@
 const express = require('express');
-const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 const cors = require('cors');
-const connectDB = require('./config/db');
+const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes');
+const workoutRoutes = require('./routes/workoutRoutes');
+const nutritionRoutes = require('./routes/nutritionRoutes');
 
 // Environment variables
 dotenv.config();
-
-// Connect to database
-connectDB();
 
 const app = express();
 
@@ -18,14 +17,18 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/workouts', workoutRoutes);
+app.use('/api/nutrition', nutritionRoutes);
 
-// Health check route
-app.get('/', (req, res) => {
-  res.json({ message: 'API çalışıyor' });
-});
+// MongoDB bağlantısı
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fitplanner', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('MongoDB bağlantısı başarılı'))
+.catch((err) => console.error('MongoDB bağlantı hatası:', err));
 
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
   console.log(`Server ${PORT} portunda çalışıyor`);
 }); 

@@ -2,46 +2,26 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: ''
-  });
-  const [error, setError] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (!formData.email || !formData.password) {
-      setError('Lütfen tüm alanları doldurun');
-      return;
-    }
+    setLoading(true);
 
     try {
-      setLoading(true);
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -55,8 +35,10 @@ const Login: React.FC = () => {
         name: data.name,
         email: data.email
       });
-      
-      navigate('/dashboard');
+
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Giriş yapılırken bir hata oluştu');
     } finally {
@@ -69,20 +51,22 @@ const Login: React.FC = () => {
       className="min-h-screen flex items-center justify-center relative"
       style={{
         backgroundImage: 'url("/img/login.png")',
-        backgroundSize: '100% auto',
+        backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundColor: '#f3f4f6'
+        backgroundRepeat: 'no-repeat'
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/20 to-black/30"></div>
-      <div className="max-w-sm w-full mx-4 space-y-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 relative z-10">
+      {/* Yarı saydam overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/40 to-black/50"></div>
+
+      {/* Login formu */}
+      <div className="max-w-md w-full mx-4 space-y-8 bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-2xl relative z-10">
         <div>
-          <h2 className="mt-2 text-center text-2xl font-extrabold text-gray-900">
-            Hesabınıza Giriş Yapın
+          <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-gray-900">
+            FitPlanner'a Hoş Geldiniz
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            FitPlanner'a Hoş Geldiniz
+            Sağlıklı yaşam yolculuğunuza devam etmek için giriş yapın
           </p>
         </div>
 
@@ -101,21 +85,19 @@ const Login: React.FC = () => {
           </div>
         )}
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-3">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email Adresi
               </label>
               <input
                 id="email"
-                name="email"
                 type="email"
-                autoComplete="email"
                 required
-                value={formData.email}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent sm:text-sm"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200"
                 placeholder="ornek@email.com"
               />
             </div>
@@ -126,13 +108,11 @@ const Login: React.FC = () => {
               </label>
               <input
                 id="password"
-                name="password"
                 type="password"
-                autoComplete="current-password"
                 required
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent sm:text-sm"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200"
                 placeholder="••••••••"
               />
             </div>
@@ -142,38 +122,39 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg text-sm font-medium text-white ${
+              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white ${
                 loading 
-                  ? 'bg-orange-300 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 shadow-lg'
+                  ? 'bg-primary-400 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 shadow-lg'
               }`}
             >
               {loading ? (
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : null}
-              {loading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Giriş Yapılıyor...
+                </>
+              ) : (
+                'Giriş Yap'
+              )}
             </button>
           </div>
-        </form>
 
-        <div className="mt-4">
-          <div className="relative">
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
-                Hesabınız yok mu?{' '}
-                <button
-                  onClick={() => navigate('/register')}
-                  className="font-medium text-green-600 hover:text-green-500 transition-colors duration-200"
-                >
-                  Kayıt Ol
-                </button>
-              </span>
-            </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Hesabınız yok mu?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/register')}
+                className="font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200"
+              >
+                Hemen Kayıt Olun
+              </button>
+            </p>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
