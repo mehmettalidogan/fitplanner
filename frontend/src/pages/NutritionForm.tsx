@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../utils/axios';
 
 interface Food {
   name: string;
@@ -24,6 +25,8 @@ interface NutritionFormData {
 
 const NutritionForm: React.FC = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<NutritionFormData>({
     meals: [{
       name: '',
@@ -105,23 +108,18 @@ const NutritionForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+
     try {
-      const response = await fetch('http://localhost:5000/api/nutrition', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('userToken')}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Beslenme kaydedilemedi');
-      }
-
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Hata:', error);
+      await axiosInstance.post('/api/nutrition', formData);
+      // Dashboard'a yönlendir ve state'i güncelle
+      navigate('/dashboard', { state: { nutritionUpdated: true } });
+    } catch (err: any) {
+      console.error('Hata:', err);
+      setError(err.response?.data?.message || 'Beslenme kaydedilemedi');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,6 +128,12 @@ const NutritionForm: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4">
         <h1 className="text-2xl font-bold text-primary-800 mb-6">Günlük Beslenme Ekle</h1>
         
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-400 text-red-700">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-6">
           {formData.meals.map((meal, mealIndex) => (
             <div key={mealIndex} className="mb-8 p-6 bg-gray-50 rounded-lg">
@@ -289,14 +293,28 @@ const NutritionForm: React.FC = () => {
               type="button"
               onClick={() => navigate('/dashboard')}
               className="px-4 py-2 text-gray-700 hover:text-gray-900"
+              disabled={loading}
             >
               İptal
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              disabled={loading}
+              className={`px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 flex items-center ${
+                loading ? 'opacity-75 cursor-not-allowed' : ''
+              }`}
             >
-              Kaydet
+              {loading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Kaydediliyor...
+                </>
+              ) : (
+                'Kaydet'
+              )}
             </button>
           </div>
         </form>

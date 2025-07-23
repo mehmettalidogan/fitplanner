@@ -1,19 +1,106 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { CalendarIcon, ScaleIcon, ChartBarIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, ScaleIcon, ChartBarIcon, PlusIcon, PencilIcon } from '@heroicons/react/24/outline';
+import axiosInstance from '../utils/axios';
+
+interface MacroData {
+  totalProtein: number;
+  totalCarbs: number;
+  totalFat: number;
+}
+
+interface WeeklyData {
+  day: string;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+interface Exercise {
+  name: string;
+  sets: number;
+  reps: number;
+  weight: number;
+}
+
+interface Workout {
+  _id: string;
+  weekDay: string;
+  name: string;
+  exercises: Exercise[];
+}
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const weeklyProgress = [
-    { day: 'Pzt', protein: 120, carbs: 200, fat: 60 },
-    { day: 'Sal', protein: 100, carbs: 180, fat: 55 },
-    { day: 'Çar', protein: 140, carbs: 210, fat: 65 },
-    { day: 'Per', protein: 110, carbs: 190, fat: 50 },
-    { day: 'Cum', protein: 130, carbs: 220, fat: 70 },
-    { day: 'Cmt', protein: 90, carbs: 160, fat: 45 },
-    { day: 'Paz', protein: 115, carbs: 185, fat: 58 },
-  ];
+  const location = useLocation();
+  const [dailyMacros, setDailyMacros] = useState<MacroData>({
+    totalProtein: 0,
+    totalCarbs: 0,
+    totalFat: 0
+  });
+  const [weeklyProgress, setWeeklyProgress] = useState<WeeklyData[]>([]);
+  const [weeklyWorkouts, setWeeklyWorkouts] = useState<Workout[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Hedef makro değerleri (bu değerler kullanıcı profilinden gelebilir)
+  const targetMacros = {
+    protein: 150,
+    carbs: 250,
+    fat: 70
+  };
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [dailyResponse, weeklyResponse, workoutsResponse] = await Promise.all([
+        axiosInstance.get('/api/nutrition/daily-macros'),
+        axiosInstance.get('/api/nutrition/weekly-macros'),
+        axiosInstance.get('/api/workouts/weekly')
+      ]);
+
+      setDailyMacros(dailyResponse.data);
+      setWeeklyProgress(weeklyResponse.data);
+      setWeeklyWorkouts(workoutsResponse.data);
+      setError(null);
+    } catch (error: any) {
+      console.error('Veri çekme hatası:', error);
+      setError('Veriler yüklenirken bir hata oluştu.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Yeni öğün eklendiğinde veya güncellendiğinde verileri yenile
+  useEffect(() => {
+    if (location.state?.nutritionUpdated || location.state?.workoutUpdated) {
+      fetchData();
+      // State'i temizle
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, fetchData, navigate]);
+
+  // getDayName fonksiyonunu kaldır çünkü artık weekDay doğrudan geliyor
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-secondary-100 flex items-center justify-center">
+        <div className="text-lg text-primary-600">Yükleniyor...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-secondary-100 flex items-center justify-center">
+        <div className="text-lg text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-secondary-100">
@@ -37,28 +124,56 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Günün Antrenmanı */}
-          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300">
-            <div className="flex items-center mb-6">
-              <div className="p-2 bg-primary-100 rounded-lg">
-                <CalendarIcon className="h-6 w-6 text-primary-600" />
-              </div>
-              <h2 className="text-xl font-semibold ml-3 text-primary-800">Günün Antrenmanı</h2>
-            </div>
-            <div className="space-y-4">
-              {[
-                { name: 'Squat', sets: '4 x 12' },
-                { name: 'Bench Press', sets: '3 x 10' },
-                { name: 'Deadlift', sets: '5 x 5' }
-              ].map((exercise, index) => (
-                <div 
-                  key={exercise.name}
-                  className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg"
-                >
-                  <span className="font-medium text-secondary-700">{exercise.name}</span>
-                  <span className="text-primary-600 font-semibold">{exercise.sets}</span>
+          {/* Haftalık Antrenman Programı */}
+          <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300 lg:col-span-2">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-primary-100 rounded-lg">
+                  <CalendarIcon className="h-6 w-6 text-primary-600" />
                 </div>
-              ))}
+                <h2 className="text-xl font-semibold ml-3 text-primary-800">Haftalık Antrenman Programı</h2>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gün</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detay</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {weeklyWorkouts.map((workout) => (
+                    <tr key={workout._id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {workout.weekDay}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {workout.name}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        <div className="space-y-1">
+                          {workout.exercises.map((exercise, idx) => (
+                            <div key={idx} className="text-xs">
+                              {exercise.name} - {exercise.sets}x{exercise.reps} ({exercise.weight}kg)
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button
+                          onClick={() => navigate(`/workout/edit/${workout._id}`)}
+                          className="text-primary-600 hover:text-primary-900"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -71,9 +186,27 @@ const Dashboard: React.FC = () => {
               <h2 className="text-xl font-semibold ml-3 text-primary-800">Günlük Makrolar</h2>
             </div>
             <div className="space-y-6">
-              <MacroProgress title="Protein" current={80} target={150} color="bg-primary-500" textColor="text-primary-700" />
-              <MacroProgress title="Karbonhidrat" current={150} target={250} color="bg-action-yellow-500" textColor="text-action-yellow-700" />
-              <MacroProgress title="Yağ" current={45} target={70} color="bg-action-orange-500" textColor="text-action-orange-700" />
+              <MacroProgress 
+                title="Protein" 
+                current={dailyMacros.totalProtein} 
+                target={targetMacros.protein} 
+                color="bg-primary-500" 
+                textColor="text-primary-700" 
+              />
+              <MacroProgress 
+                title="Karbonhidrat" 
+                current={dailyMacros.totalCarbs} 
+                target={targetMacros.carbs} 
+                color="bg-action-yellow-500" 
+                textColor="text-action-yellow-700" 
+              />
+              <MacroProgress 
+                title="Yağ" 
+                current={dailyMacros.totalFat} 
+                target={targetMacros.fat} 
+                color="bg-action-orange-500" 
+                textColor="text-action-orange-700" 
+              />
             </div>
           </div>
 

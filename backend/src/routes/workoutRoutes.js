@@ -1,15 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const workoutController = require('../controllers/workoutController');
+const { 
+  createWorkout, 
+  getWorkouts, 
+  getWorkout, 
+  updateWorkout, 
+  deleteWorkout,
+  getWeeklyWorkouts 
+} = require('../controllers/workoutController');
 const { protect } = require('../middleware/authMiddleware');
 
-// Tüm route'lar için authentication gerekli
+// Tüm route'lar için auth middleware'i kullan
 router.use(protect);
 
-router.post('/', workoutController.createWorkout);
-router.get('/', workoutController.getWorkouts);
-router.get('/:id', workoutController.getWorkout);
-router.put('/:id', workoutController.updateWorkout);
-router.delete('/:id', workoutController.deleteWorkout);
+// Haftalık antrenmanları getir
+router.get('/weekly', getWeeklyWorkouts);
+
+// Diğer route'lar
+router.post('/', createWorkout);
+router.get('/', getWorkouts);
+router.get('/:id', getWorkout);
+router.put('/:id', updateWorkout);
+router.delete('/:id', deleteWorkout);
 
 module.exports = router; 

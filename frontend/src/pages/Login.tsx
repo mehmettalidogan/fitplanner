@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import axiosInstance from '../utils/axios';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -16,31 +17,23 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      const response = await axiosInstance.post('/api/auth/login', {
+        email,
+        password
       });
 
-      const data = await response.json();
+      const { token, _id, name, email: userEmail } = response.data;
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Giriş başarısız');
-      }
-
-      login(data.token, {
-        id: data._id,
-        name: data.name,
-        email: data.email
+      login(token, {
+        id: _id,
+        name,
+        email: userEmail
       });
 
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 100);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Giriş yapılırken bir hata oluştu');
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Giriş yapılırken bir hata oluştu');
     } finally {
       setLoading(false);
     }

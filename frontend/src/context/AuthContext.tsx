@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // LocalStorage'dan token'ı kontrol et
-    const storedToken = localStorage.getItem('userToken');
+    const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
       setIsAuthenticated(true);
@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (token: string, userData: any) => {
-    localStorage.setItem('userToken', token);
+    localStorage.setItem('token', token);
     localStorage.setItem('userData', JSON.stringify(userData));
     setToken(token);
     setUser(userData);
@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    localStorage.removeItem('userToken');
+    localStorage.removeItem('token');
     localStorage.removeItem('userData');
     setToken(null);
     setUser(null);
