@@ -4,7 +4,7 @@ const Workout = require('../models/Workout');
 const getWeeklyWorkouts = async (req, res) => {
   try {
     const workouts = await Workout.find({
-      userId: req.user._id,
+      userId: req.user.userId,
       isTemplate: true
     }).sort({ weekDay: 1 });
 
@@ -20,7 +20,7 @@ const createWorkout = async (req, res) => {
   try {
     // Aynı gün için önceki şablonu kontrol et
     const existingWorkout = await Workout.findOne({
-      userId: req.user._id,
+      userId: req.user.userId,
       weekDay: req.body.weekDay,
       isTemplate: true
     });
@@ -29,7 +29,7 @@ const createWorkout = async (req, res) => {
       // Varolan şablonu güncelle
       const updatedWorkout = await Workout.findByIdAndUpdate(
         existingWorkout._id,
-        { ...req.body, userId: req.user._id, isTemplate: true },
+        { ...req.body, userId: req.user.userId, isTemplate: true },
         { new: true }
       );
       return res.json(updatedWorkout);
@@ -38,7 +38,7 @@ const createWorkout = async (req, res) => {
     // Yeni şablon oluştur
     const workout = new Workout({
       ...req.body,
-      userId: req.user._id,
+      userId: req.user.userId,
       isTemplate: true
     });
     const savedWorkout = await workout.save();
@@ -56,7 +56,7 @@ const createWorkout = async (req, res) => {
 const getWorkouts = async (req, res) => {
   try {
     const workouts = await Workout.find({ 
-      userId: req.user._id,
+      userId: req.user.userId,
       isTemplate: true 
     }).sort({ weekDay: 1 });
     res.json(workouts);
@@ -70,7 +70,7 @@ const getWorkout = async (req, res) => {
   try {
     const workout = await Workout.findOne({
       _id: req.params.id,
-      userId: req.user._id
+      userId: req.user.userId
     });
     if (!workout) {
       return res.status(404).json({ message: 'Antrenman bulunamadı' });
@@ -87,7 +87,7 @@ const updateWorkout = async (req, res) => {
     // Eğer gün değiştiyse, yeni gün için çakışma kontrolü yap
     if (req.body.weekDay) {
       const existingWorkout = await Workout.findOne({
-        userId: req.user._id,
+        userId: req.user.userId,
         weekDay: req.body.weekDay,
         isTemplate: true,
         _id: { $ne: req.params.id }
@@ -103,7 +103,7 @@ const updateWorkout = async (req, res) => {
     const workout = await Workout.findOneAndUpdate(
       {
         _id: req.params.id,
-        userId: req.user._id
+        userId: req.user.userId
       },
       { ...req.body, isTemplate: true },
       { new: true }
@@ -123,7 +123,7 @@ const deleteWorkout = async (req, res) => {
   try {
     const workout = await Workout.findOneAndDelete({
       _id: req.params.id,
-      userId: req.user._id
+      userId: req.user.userId
     });
     if (!workout) {
       return res.status(404).json({ message: 'Antrenman bulunamadı' });

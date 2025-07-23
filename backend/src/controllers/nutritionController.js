@@ -18,7 +18,7 @@ exports.createNutrition = async (req, res) => {
   try {
     const nutritionData = {
       ...req.body,
-      userId: req.user._id
+      userId: req.user.userId
     };
 
     // Toplam makroları hesapla
@@ -39,7 +39,7 @@ exports.createNutrition = async (req, res) => {
 // Kullanıcının beslenme kayıtlarını getir
 exports.getNutritions = async (req, res) => {
   try {
-    const nutritions = await Nutrition.find({ userId: req.user._id })
+    const nutritions = await Nutrition.find({ userId: req.user.userId })
       .sort({ date: -1 });
     res.json(nutritions);
   } catch (error) {
@@ -52,7 +52,7 @@ exports.getNutrition = async (req, res) => {
   try {
     const nutrition = await Nutrition.findOne({
       _id: req.params.id,
-      userId: req.user._id
+      userId: req.user.userId
     });
     if (!nutrition) {
       return res.status(404).json({ message: 'Beslenme kaydı bulunamadı' });
@@ -78,7 +78,7 @@ exports.updateNutrition = async (req, res) => {
     }
 
     const nutrition = await Nutrition.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user._id },
+      { _id: req.params.id, userId: req.user.userId },
       nutritionData,
       { new: true }
     );
@@ -97,7 +97,7 @@ exports.deleteNutrition = async (req, res) => {
   try {
     const nutrition = await Nutrition.findOneAndDelete({
       _id: req.params.id,
-      userId: req.user._id
+      userId: req.user.userId
     });
     if (!nutrition) {
       return res.status(404).json({ message: 'Beslenme kaydı bulunamadı' });
@@ -115,7 +115,7 @@ exports.getDailyMacros = async (req, res) => {
     today.setHours(0, 0, 0, 0);
     
     const dailyNutritions = await Nutrition.find({
-      userId: req.user._id,
+      userId: req.user.userId,
       date: {
         $gte: today,
         $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
@@ -144,7 +144,7 @@ exports.getWeeklyMacros = async (req, res) => {
     const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const weeklyNutritions = await Nutrition.find({
-      userId: req.user._id,
+      userId: req.user.userId,
       date: {
         $gte: weekAgo,
         $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
@@ -169,8 +169,9 @@ exports.getWeeklyMacros = async (req, res) => {
         acc.protein += (nutrition.totalProtein || 0);
         acc.carbs += (nutrition.totalCarbs || 0);
         acc.fat += (nutrition.totalFat || 0);
+        acc.calories += (nutrition.totalCalories || 0);
         return acc;
-      }, { protein: 0, carbs: 0, fat: 0 });
+      }, { protein: 0, carbs: 0, fat: 0, calories: 0 });
 
       weeklyData.unshift({
         day: days[date.getDay()],

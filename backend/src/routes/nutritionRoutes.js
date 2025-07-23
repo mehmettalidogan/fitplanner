@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const nutritionController = require('../controllers/nutritionController');
-const { protect } = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Tüm route'lar için authentication gerekli
-router.use(protect);
+router.use(authMiddleware);
 
 router.post('/', nutritionController.createNutrition);
 router.get('/', nutritionController.getNutritions);

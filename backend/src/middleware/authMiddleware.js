@@ -1,32 +1,38 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const config = require('../config/db');
 
-const protect = async (req, res, next) => {
-  let token;
+const authMiddleware = async (req, res, next) => {
+  try {
+    // Token kontrolü
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Yetkilendirme başarısız. Token bulunamadı.' });
+    }
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
+    // Token'ı ayıkla
+    const token = authHeader.split(' ')[1];
+
     try {
-      // Token'ı al
-      token = req.headers.authorization.split(' ')[1];
-
       // Token'ı doğrula
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, config.jwtSecret);
+      
+      // Kullanıcıyı bul
+      const user = await User.findById(decoded.userId).select('-password');
+      if (!user) {
+        return res.status(401).json({ message: 'Yetkilendirme başarısız. Kullanıcı bulunamadı.' });
+      }
 
-      // Kullanıcıyı bul ve şifre hariç bilgileri req.user'a ekle
-      req.user = await User.findById(decoded.id).select('-password');
-
+      // Request nesnesine kullanıcı bilgisini ekle
+      req.user = decoded;
       next();
     } catch (error) {
-      res.status(401).json({ message: 'Token geçersiz' });
+      return res.status(401).json({ message: 'Yetkilendirme başarısız. Geçersiz token.' });
     }
-  }
-
-  if (!token) {
-    res.status(401).json({ message: 'Token bulunamadı' });
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    return res.status(500).json({ message: 'Sunucu hatası.' });
   }
 };
 
-module.exports = { protect }; 
+module.exports = authMiddleware; 

@@ -8,10 +8,10 @@ const {
   deleteWorkout,
   getWeeklyWorkouts 
 } = require('../controllers/workoutController');
-const { protect } = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Tüm route'lar için auth middleware'i kullan
-router.use(protect);
+router.use(authMiddleware);
 
 // Haftalık antrenmanları getir
 router.get('/weekly', getWeeklyWorkouts);

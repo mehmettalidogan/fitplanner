@@ -1,16 +1,10 @@
-const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log(`MongoDB Bağlantısı Başarılı: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Hata: ${error.message}`);
-    process.exit(1);
-  }
-};
+// Environment variables'ı yükle
+dotenv.config();
 
-module.exports = connectDB; 
+module.exports = {
+  mongoURI: process.env.MONGODB_URI || 'mongodb://localhost:27017/fitplanner',
+  jwtSecret: process.env.JWT_SECRET || 'gizli-anahtar-geliştirme-ortamı-için',
+  port: process.env.PORT || 5000
+}; 
