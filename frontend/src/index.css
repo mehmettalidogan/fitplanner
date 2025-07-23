@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  .text-shadow-sm {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Özel Scroll Tasarımı */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6; /* secondary-100 */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #22c55e; /* primary-500 */
+  border-radius: 8px;
+  border: 3px solid #f3f4f6; /* secondary-100 */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #16a34a; /* primary-600 */
+}
+
+/* Firefox için scroll tasarımı */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #22c55e #f3f4f6; /* primary-500 ve secondary-100 */
+}
+
+/* Smooth Scroll Davranışı */
+html {
+  scroll-behavior: smooth;
+}
