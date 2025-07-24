@@ -22,12 +22,12 @@ const Login: React.FC = () => {
         password
       });
 
-      const { token, _id, name, email: userEmail } = response.data;
+      const { token, user } = response.data;
 
       login(token, {
-        id: _id,
-        name,
-        email: userEmail
+        id: user.id,
+        name: user.name,
+        email: user.email
       });
 
       navigate('/dashboard');

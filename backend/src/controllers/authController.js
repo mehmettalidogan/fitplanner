@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/db');
 
 // Kullanıcı kaydı
-const register = async (req, res) => {
+exports.register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
 
@@ -44,7 +44,7 @@ const register = async (req, res) => {
 };
 
 // Kullanıcı girişi
-const login = async (req, res) => {
+exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -82,7 +82,7 @@ const login = async (req, res) => {
 };
 
 // Kullanıcı profili getirme
-const getProfile = async (req, res) => {
+exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select('-password');
     if (!user) {
@@ -96,7 +96,7 @@ const getProfile = async (req, res) => {
 };
 
 // Kullanıcı profili güncelleme
-const updateProfile = async (req, res) => {
+exports.updateProfile = async (req, res) => {
   try {
     const updates = req.body;
     const allowedUpdates = ['age', 'gender', 'height', 'weight', 'goal', 'activityLevel'];
@@ -196,11 +196,4 @@ const updateProfile = async (req, res) => {
     console.error('Profil güncelleme hatası:', error);
     res.status(500).json({ message: 'Profil güncellenirken bir hata oluştu.' });
   }
-};
-
-module.exports = {
-  register,
-  login,
-  getProfile,
-  updateProfile
 }; 
