@@ -1,25 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import NewsletterSubscription from '../components/NewsletterSubscription';
+import axiosInstance from '../utils/axios';
 
 interface BlogPost {
-  id: string;
+  _id: string;
   title: string;
   excerpt: string;
   content: string;
+  slug: string;
   author: {
     name: string;
-    avatar: string;
-    bio: string;
+    email: string;
   };
   category: string;
   tags: string[];
-  publishDate: string;
-  readTime: number;
-  image: string;
-  featured: boolean;
+  publishedAt: string;
+  createdAt: string;
+  readingTime: number;
+  featuredImage: string;
+  isSticky: boolean;
+  views: number;
   likes: number;
-  comments: number;
+  status: string;
 }
 
 interface Comment {
@@ -32,10 +35,40 @@ interface Comment {
 }
 
 const Blog: React.FC = () => {
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchBlogPosts();
+  }, [selectedCategory, searchTerm]);
+
+  const fetchBlogPosts = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        status: 'published',
+        ...(selectedCategory !== 'all' && { category: selectedCategory }),
+        ...(searchTerm && { search: searchTerm }),
+        limit: '20'
+      });
+
+      const response = await axiosInstance.get(`/api/blog?${params}`);
+      
+      if (response.data.success) {
+        setBlogPosts(response.data.blogs);
+      }
+    } catch (err: any) {
+      console.error('Fetch blogs error:', err);
+      setError('Blog yazıları yüklenemedi.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openPostDetail = (post: BlogPost) => {
     setSelectedPost(post);
@@ -47,502 +80,33 @@ const Blog: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const blogPosts: BlogPost[] = [
-    {
-      id: '1',
-      title: 'Yeni Başlayanlar İçin Doğru Antrenman Rehberi',
-      excerpt: 'Spor salonuna ilk kez gidecekler için kapsamlı rehber. Temel hareketler, program düzeni ve motivasyon ipuçları.',
-      content: `Spor salonuna ilk kez adım atmak hem heyecan verici hem de biraz korkutucu olabilir. Bu rehber ile doğru başlangıç yapacaksınız.
-
-## Temel Prensipler
-
-### 1. Küçük Adımlarla Başlayın
-İlk hafta vücudunuzu alıştırmak için haftada 3 gün yeterli. Her seans 45-60 dakika arasında olmalı.
-
-### 2. Temel Hareketlere Odaklanın
-- **Squat**: Bacak ve kalça kasları için
-- **Deadlift**: Tüm vücut için güçlü hareket
-- **Bench Press**: Göğüs ve kol kasları
-- **Pull-up**: Sırt kasları için
-
-### 3. Form Tekniği Öncelikli
-Ağırlık arttırmak yerine doğru form ile çalışın. Yanlış teknik sakatlık riski yaratır.
-
-## İlk 4 Haftalık Program
-
-**1. Hafta**: Vücut ağırlığı egzersizleri
-**2. Hafta**: Hafif ağırlıklar ekleme
-**3. Hafta**: Set sayısını artırma
-**4. Hafta**: Ağırlık ve yoğunluk artışı
-
-## Motivasyon İpuçları
-
-- Hedeflerinizi yazın
-- İlerlemenizi kaydedin
-- Sabırlı olun, sonuçlar zaman alır
-- Antrenman arkadaşı bulun
-
-Unutmayın, en önemli şey düzenli olmak. Mükemmel antrenman yapmaya çalışmak yerine tutarlı olmaya odaklanın.`,
-      author: {
-        name: 'Mehmet Ali Doğan',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-        bio: 'Fitness uzmanı ve FitPlanner kurucusu'
-      },
-      category: 'Antrenman',
-      tags: ['Başlangıç', 'Rehber', 'Spor Salonu'],
-      publishDate: '2024-01-15',
-      readTime: 8,
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop',
-      featured: true,
-      likes: 124,
-      comments: 15
-    },
-    {
-      id: '2',
-      title: 'Metabolizmayı Hızlandıran 10 Süper Besin',
-      excerpt: 'Doğal yöntemlerle metabolizmanızı hızlandırarak yağ yakımını artıracak besinleri keşfedin.',
-      content: `Metabolizma hızınızı artırmak için doğru besinleri seçmek çok önemli. İşte metabolizmanızı boost edecek süper besinler:
-
-## En Etkili 10 Besin
-
-### 1. Yeşil Çay
-- Kateşin içeriği yağ yakımını %4-5 artırır
-- Günde 3-4 bardak tüketin
-- Antrenman öncesi özellikle etkili
-
-### 2. Acı Biber
-- Kapsaisin metabolizmayı geçici olarak hızlandırır
-- Termal etkisi sayesinde kalori yakımı artar
-- Öğünlere ekleyerek tüketin
-
-### 3. Protein Açısından Zengin Besinler
-- **Tavuk göğsü**: Yağsız protein kaynağı
-- **Yumurta**: Tam protein profili
-- **Balık**: Omega-3 ve protein
-- **Baklagiller**: Bitkisel protein
-
-### 4. Soğuk Su
-- Vücut suyu ısıtmak için enerji harcar
-- Günde 2-3 litre soğuk su için
-- Metabolizmanızı %30 artırabilir
-
-### 5. Kahve
-- Kafein metabolizmayı %3-11 artırır
-- Antrenman öncesi performansı destekler
-- Günde 2-3 fincan ideal
-
-## Beslenme Zamanlaması
-
-**Sabah**: Protein + Kompleks karbonhidrat
-**Öğle**: Dengeli makro dağılımı
-**Akşam**: Protein ağırlıklı + Sebze
-
-## Bonus İpuçları
-
-- Düzenli öğün saatleri
-- Ara öğünlerde protein
-- Bol su tüketimi
-- Yeterli uyku
-
-Bu besinleri düzenli tükettiğinizde 2-3 hafta içinde farkı hissetmeye başlayacaksınız.`,
-      author: {
-        name: 'Dr. Ayşe Nutritionist',
-        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face',
-        bio: 'Beslenme uzmanı, 10 yıl deneyim'
-      },
-      category: 'Beslenme',
-      tags: ['Metabolizma', 'Yağ Yakımı', 'Süper Besinler'],
-      publishDate: '2024-01-12',
-      readTime: 6,
-      image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=400&fit=crop',
-      featured: true,
-      likes: 89,
-      comments: 23
-    },
-    {
-      id: '3',
-      title: 'Home Workout: Ekipmansız Antrenman Programı',
-      excerpt: 'Hiç ekipman kullanmadan evde yapabileceğiniz etkili 30 dakikalık antrenman programı.',
-      content: `Ekipman olmadan evde etkili antrenman yapmak mümkün! İşte 30 dakikalık tam vücut programı:
-
-## 5 Dakika Isınma
-- Marş (2 dk)
-- Kol çevirme (1 dk)
-- Bacak salıncakları (1 dk)
-- Dinamik germe (1 dk)
-
-## Ana Antrenman (20 Dakika)
-
-### Tur 1: Alt Vücut (6 dk)
-**Her egzersiz 45 sn çalış, 15 sn dinlen**
-1. Squat
-2. Lunge (sağ bacak)
-3. Lunge (sol bacak)
-4. Jump Squat
-5. Single-leg Deadlift (sağ)
-6. Single-leg Deadlift (sol)
-
-### Tur 2: Üst Vücut (7 dk)
-1. Push-up
-2. Pike Push-up
-3. Triceps Dips (sandalye)
-4. Mountain Climber
-5. Plank
-6. Side Plank (sağ)
-7. Side Plank (sol)
-
-### Tur 3: Kardiyo HIIT (7 dk)
-1. Burpee
-2. High Knees
-3. Jumping Jacks
-4. Russian Twist
-5. Bear Crawl
-6. Star Jumps
-7. Sprint yerinde
-
-## 5 Dakika Soğuma
-- Yavaş yürüyüş (2 dk)
-- Statik germe (3 dk)
-
-## Haftalık Program
-- **Pazartesi**: Tam vücut
-- **Salı**: Dinlenme
-- **Çarşamba**: Tam vücut
-- **Perşembe**: Dinlenme
-- **Cuma**: Tam vücut
-- **Hafta sonu**: Aktif dinlenme
-
-Bu program ile 4-6 hafta sonunda belirgin gelişim göreceksiniz!`,
-      author: {
-        name: 'Coach Emre',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-        bio: 'Kişisel antrenör, home workout uzmanı'
-      },
-      category: 'Antrenman',
-      tags: ['Home Workout', 'Ekipmansız', 'HIIT'],
-      publishDate: '2024-01-10',
-      readTime: 5,
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop',
-      featured: false,
-      likes: 156,
-      comments: 31
-    },
-    {
-      id: '4',
-      title: 'Meal Prep: Haftalık Beslenme Hazırlığı',
-      excerpt: 'Zamanından tasarruf ederken sağlıklı beslenmenin püf noktaları ve pratik meal prep önerileri.',
-      content: `Meal prep ile hem zamandan tasarruf edin hem de sağlıklı beslenin!
-
-## Meal Prep Temelleri
-
-### Planlama (Pazar)
-- Haftalık menü oluşturma
-- Alışveriş listesi hazırlama
-- Kap ve malzeme kontrolü
-
-### Hazırlık (Pazar/Pazartesi)
-- 2-3 saat ayırın
-- Tüm sebzeleri yıkayın
-- Proteinleri pişirin
-- Karbonhidratları hazırlayın
-
-## 5 Günlük Meal Prep Menüsü
-
-### Protein Kaynakları
-- **Tavuk göğsü**: Fırında baharatlı
-- **Somon**: Izgara
-- **Yumurta**: Haşlama
-- **Tofu**: Marine edilmiş
-
-### Karbonhidratlar
-- **Quinoa**: Sebzeli
-- **Tatlı patates**: Fırında
-- **Esmer pirinç**: Sade
-- **Bulgur**: Domatesli
-
-### Sebzeler
-- **Brokoli**: Buharda
-- **Havuç**: Çiğ strips
-- **Salatalık**: Dilimli
-- **Cherry domates**: Çiğ
-
-## Saklama İpuçları
-
-### Cam Kaplar Kullanın
-- BPA free
-- Mikrodalga uyumlu
-- Buzdolabında 4-5 gün
-
-### Dondurucu Dostu
-- Çorba ve güveçler
-- Pişmiş tahıllar
-- Soslar ve dressing'ler
-
-## Haftalık Organizasyon
-
-**Pazar**: Planlama ve alışveriş
-**Pazartesi**: 2-3 saatlik prep
-**Çarşamba**: Mini prep (sebze)
-**Cuma**: Gelecek hafta planı
-
-## Pratik Kombinasyonlar
-
-### Combo 1: Mediterranean
-Somon + Quinoa + Karışık sebze
-
-### Combo 2: Asian Style
-Tavuk + Esmer pirinç + Wok sebze
-
-### Combo 3: Protein Power
-Yumurta + Tatlı patates + Avokado
-
-Meal prep ile sağlıklı beslenme artık çok daha kolay!`,
-      author: {
-        name: 'Chef Zeynep',
-        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
-        bio: 'Sağlıklı mutfak uzmanı'
-      },
-      category: 'Beslenme',
-      tags: ['Meal Prep', 'Planlama', 'Sağlıklı Beslenme'],
-      publishDate: '2024-01-08',
-      readTime: 7,
-      image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=400&fit=crop',
-      featured: false,
-      likes: 203,
-      comments: 18
-    },
-    {
-      id: '5',
-      title: 'Motivasyon Düştüğünde Yapılacak 7 Şey',
-      excerpt: 'Antrenman motivasyonunuz düştüğünde sizi tekrar rayına sokacak pratik stratejiler.',
-      content: `Motivasyon düşüklüğü herkesi yaşar. İşte bu durumdan çıkmanın yolları:
-
-## 1. Hedeflerinizi Yeniden Gözden Geçirin
-
-### SMART Hedefler Belirleyin
-- **Specific**: Spesifik
-- **Measurable**: Ölçülebilir
-- **Achievable**: Ulaşılabilir
-- **Relevant**: İlgili
-- **Time-bound**: Zaman sınırlı
-
-### Görsel Hatırlatıcılar
-- Hedef fotoğrafları
-- İlerleme grafikleri
-- Motivasyon notiları
-
-## 2. Rutininizi Değiştirin
-
-### Yeni Egzersizler Deneyin
-- Farklı antrenman stilleri
-- Outdoor aktiviteler
-- Grup dersleri
-- Yeni spor dalları
-
-### Antrenman Saatini Değiştirin
-- Sabah erken
-- Öğle arası
-- Akşam saatleri
-
-## 3. Sosyal Destek Sistemi
-
-### Antrenman Arkadaşı
-- Birlikte motivasyon
-- Hesap verebilirlik
-- Rekabet unsuru
-
-### Online Topluluk
-- Sosyal medya grupları
-- Fitness uygulamaları
-- İlerleme paylaşımı
-
-## 4. Küçük Kazanımları Kutlayın
-
-### Mikro Hedefler
-- Haftalık küçük amaçlar
-- Günlük başarılar
-- Her adımı değerlendirin
-
-### Ödül Sistemi
-- Hediye verin kendinize
-- Özel aktiviteler planlayın
-- Self-care zamanı
-
-## 5. Neden'inizi Hatırlayın
-
-### Derin Motivasyon
-- Sağlık hedefleri
-- Aile için fit olmak
-- Özgüven artışı
-- Uzun yaşam
-
-## 6. Profesyonel Yardım
-
-### Kişisel Antrenör
-- Özel program
-- Teknik düzeltme
-- Motivasyon desteği
-
-### Beslenme Uzmanı
-- Doğru diyet planı
-- Enerji optimizasyonu
-
-## 7. Molayı Kabul Edin
-
-### Aktif Dinlenme
-- Hafif yürüyüş
-- Yoga/meditasyon
-- Masaj ve recovery
-
-Unutmayın: Motivasyon geçicidir, disiplin kalıcıdır. Küçük adımlarla devam edin!`,
-      author: {
-        name: 'Psikolog Dr. Can',
-        avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=100&h=100&fit=crop&crop=face',
-        bio: 'Spor psikolojisi uzmanı'
-      },
-      category: 'Motivasyon',
-      tags: ['Motivasyon', 'Psikoloji', 'Başarı'],
-      publishDate: '2024-01-05',
-      readTime: 9,
-      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop',
-      featured: false,
-      likes: 167,
-      comments: 42
-    },
-    {
-      id: '6',
-      title: 'Supplement Rehberi: Neye İhtiyacınız Var?',
-      excerpt: 'Hangi supplementlerin gerçekten işe yaradığını ve hangilerinin gereksiz olduğunu öğrenin.',
-      content: `Supplement dünyası karmaşık görünebilir. İşte science-based yaklaşım:
-
-## Temel Supplementler
-
-### 1. Protein Tozu
-**Ne Zaman**: Antrenman sonrası 30 dk içinde
-**Miktar**: 25-30g
-**Tür**: Whey protein (hızlı emilim)
-
-### 2. Kreatin Monohydrat
-**Faydası**: %15 güç artışı
-**Miktar**: Günde 5g
-**Zaman**: Herhangi bir saatte
-
-### 3. Vitamin D3
-**Eksiklik**: Türkiye'de %80 oranında
-**Miktar**: 2000-4000 IU
-**Test**: Kan tahlili ile kontrol
-
-### 4. Omega-3
-**Kaynak**: Balık yağı
-**Miktar**: EPA/DHA 1-2g
-**Fayda**: İyileşme ve inflamasyon
-
-## Duruma Göre Supplementler
-
-### Kas Kazanımı İçin
-- **HMB**: Kas yıkımını azaltır
-- **Leucine**: mTOR aktivasyonu
-- **ZMA**: Zinç, Magnezyum, B6
-
-### Yağ Yakımı İçin
-- **L-Carnitine**: Yağ oksidasyonu
-- **Green Tea Extract**: Metabolizma
-- **CLA**: Vücut kompozisyonu
-
-### Performans İçin
-- **Beta-Alanine**: Dayanıklılık
-- **Citrulline**: Pump ve dayanıklılık
-- **Caffeine**: Enerji ve odaklanma
-
-## Gereksiz Supplementler
-
-### ❌ BCAAs
-Tam protein varsa gereksiz
-
-### ❌ Testosterone Booster
-Genç erkeklerde etkisiz
-
-### ❌ Fat Burner
-Kalori açığı olmadan işlemez
-
-### ❌ Multivitamin
-Dengeli beslenme yeterli
-
-## Timing Stratejisi
-
-### Pre-Workout (30-45 dk önce)
-- Caffeine: 200mg
-- Citrulline: 6-8g
-- Beta-Alanine: 3-5g
-
-### Post-Workout (0-30 dk)
-- Whey protein: 25-30g
-- Kreatin: 5g
-- Basit karbonhidrat: 30-50g
-
-### Yatmadan Önce
-- Casein protein: 25g
-- ZMA: 1 porsiyon
-- Magnezyum: 400mg
-
-## Bütçe Dostu Seçenekler
-
-**En Önemli 3**:
-1. Whey protein
-2. Kreatin
-3. Vitamin D3
-
-**Toplam Maliyet**: Aylık 150-200 TL
-
-## Güvenlik Uyarıları
-
-- Karaciğer/böbrek sorunu varsa doktor onayı
-- Hamileler dikkatli olmalı
-- Aşırı doz yapmayın
-- Kaliteli markalar seçin
-
-Supplement sihir değildir. %80 beslenme, %20 supplement!`,
-      author: {
-        name: 'Dr. Sport Nutrition',
-        avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face',
-        bio: 'Spor beslenme uzmanı, PhD'
-      },
-      category: 'Beslenme',
-      tags: ['Supplementler', 'Beslenme', 'Performans'],
-      publishDate: '2024-01-03',
-      readTime: 12,
-      image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=400&fit=crop',
-      featured: false,
-      likes: 198,
-      comments: 67
-    }
-  ];
-
   const categories = [
     { key: 'all', name: 'Tümü', icon: '📚', count: blogPosts.length },
-    { key: 'Antrenman', name: 'Antrenman', icon: '💪', count: blogPosts.filter(p => p.category === 'Antrenman').length },
-    { key: 'Beslenme', name: 'Beslenme', icon: '🥗', count: blogPosts.filter(p => p.category === 'Beslenme').length },
-    { key: 'Motivasyon', name: 'Motivasyon', icon: '🔥', count: blogPosts.filter(p => p.category === 'Motivasyon').length }
+    { key: 'antrenman', name: 'Antrenman', icon: '💪', count: blogPosts.filter(p => p.category === 'antrenman').length },
+    { key: 'beslenme', name: 'Beslenme', icon: '🥗', count: blogPosts.filter(p => p.category === 'beslenme').length },
+    { key: 'motivasyon', name: 'Motivasyon', icon: '🔥', count: blogPosts.filter(p => p.category === 'motivasyon').length },
+    { key: 'saglik', name: 'Sağlık', icon: '🏥', count: blogPosts.filter(p => p.category === 'saglik').length },
+    { key: 'yasamtarzi', name: 'Yaşam Tarzı', icon: '🌟', count: blogPosts.filter(p => p.category === 'yasamtarzi').length },
+    { key: 'genel', name: 'Genel', icon: '📝', count: blogPosts.filter(p => p.category === 'genel').length }
   ];
 
-  const filteredPosts = blogPosts.filter(post => {
-    const categoryMatch = selectedCategory === 'all' || post.category === selectedCategory;
-    const searchMatch = searchTerm === '' || 
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    return categoryMatch && searchMatch;
-  });
+  const featuredPosts = blogPosts.filter(post => post.isSticky);
+  const regularPosts = blogPosts.filter(post => !post.isSticky);
 
-  const featuredPosts = blogPosts.filter(post => post.featured);
-  const regularPosts = filteredPosts.filter(post => !post.featured);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('tr-TR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   const sampleComments: Comment[] = [
     {
       id: '1',
       author: 'Fitness Sevdalısı',
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50&h=50&fit=crop&crop=face',
-      content: 'Çok faydalı bir yazı olmuş! Özellikle form tekniği kısmı çok önemli, ben de başlangıçta bu konuda zorlanmıştım.',
+      content: 'Çok faydalı bir yazı olmuş! Teşekkürler.',
       date: '2 gün önce',
       likes: 12
     },
@@ -550,19 +114,42 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
       id: '2',
       author: 'Sporcu Adem',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face',
-      content: 'Bu programı deneyeceğim kesinlikle. Home workout konusunda çok iyi bilgiler paylaşmışsınız.',
+      content: 'Bu konuda çok iyi bilgiler paylaşmışsınız.',
       date: '1 gün önce',
       likes: 8
-    },
-    {
-      id: '3',
-      author: 'Healthy Life',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=50&h=50&fit=crop&crop=face',
-      content: 'Meal prep konusunda bu kadar detaylı bilgi bulamıyordum. Teşekkürler!',
-      date: '3 saat önce',
-      likes: 15
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="pt-20 flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="pt-20 max-w-4xl mx-auto px-4 py-16 text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-red-800 mb-2">Hata</h3>
+            <p className="text-red-700">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Yeniden Dene
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -632,10 +219,10 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {featuredPosts.map((post) => (
-                <div key={post.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
+                <div key={post._id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
                   <div className="relative">
                     <img 
-                      src={post.image} 
+                      src={post.featuredImage || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop'} 
                       alt={post.title}
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -647,10 +234,10 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
                   </div>
                   <div className="p-6">
                     <div className="flex items-center mb-3">
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium capitalize">
                         {post.category}
                       </span>
-                      <span className="ml-4 text-sm text-gray-500">{post.readTime} dk okuma</span>
+                      <span className="ml-4 text-sm text-gray-500">{post.readingTime} dk okuma</span>
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors">
                       {post.title}
@@ -659,14 +246,14 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <img 
-                          src={post.author.avatar} 
-                          alt={post.author.name}
-                          className="w-8 h-8 rounded-full mr-3"
-                        />
+                        <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                          <span className="text-purple-600 font-medium text-sm">
+                            {post.author.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{post.author.name}</p>
-                          <p className="text-xs text-gray-500">{new Date(post.publishDate).toLocaleDateString('tr-TR')}</p>
+                          <p className="text-xs text-gray-500">{formatDate(post.publishedAt || post.createdAt)}</p>
                         </div>
                       </div>
                       <button
@@ -693,10 +280,10 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
           {regularPosts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {regularPosts.map((post) => (
-                <article key={post.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
+                <article key={post._id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
                   <div className="relative">
                     <img 
-                      src={post.image} 
+                      src={post.featuredImage || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop'} 
                       alt={post.title}
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -716,10 +303,10 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
                   
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                      <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium capitalize">
                         {post.category}
                       </span>
-                      <span className="text-sm text-gray-500">{post.readTime} dk</span>
+                      <span className="text-sm text-gray-500">{post.readingTime} dk</span>
                     </div>
                     
                     <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
@@ -730,11 +317,11 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <img 
-                          src={post.author.avatar} 
-                          alt={post.author.name}
-                          className="w-6 h-6 rounded-full mr-2"
-                        />
+                        <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center mr-2">
+                          <span className="text-purple-600 font-medium text-xs">
+                            {post.author.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
                         <span className="text-sm text-gray-700">{post.author.name}</span>
                       </div>
                       
@@ -747,9 +334,10 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
                         </span>
                         <span className="flex items-center">
                           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
-                          {post.comments}
+                          {post.views}
                         </span>
                       </div>
                     </div>
@@ -770,8 +358,8 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
                 <svg className="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">Sonuç bulunamadı</h3>
-                <p className="mt-2 text-gray-500">Arama kriterlerinize uygun blog yazısı bulunamadı.</p>
+                <h3 className="mt-4 text-lg font-medium text-gray-900">Henüz blog yazısı yok</h3>
+                <p className="mt-2 text-gray-500">İlk blog yazıları yakında yayınlanacak!</p>
               </div>
             </div>
           )}
@@ -792,7 +380,7 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
             {/* Modal Header */}
             <div className="relative">
               <img 
-                src={selectedPost.image} 
+                src={selectedPost.featuredImage || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop'} 
                 alt={selectedPost.title}
                 className="w-full h-64 object-cover"
               />
@@ -811,25 +399,24 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
               {/* Post Header */}
               <div className="mb-6">
                 <div className="flex items-center mb-4">
-                  <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium mr-4">
+                  <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium mr-4 capitalize">
                     {selectedPost.category}
                   </span>
-                  <span className="text-sm text-gray-500">{selectedPost.readTime} dakika okuma</span>
+                  <span className="text-sm text-gray-500">{selectedPost.readingTime} dakika okuma</span>
                 </div>
                 
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">{selectedPost.title}</h1>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <img 
-                      src={selectedPost.author.avatar} 
-                      alt={selectedPost.author.name}
-                      className="w-12 h-12 rounded-full mr-4"
-                    />
+                    <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center mr-4">
+                      <span className="text-purple-600 font-bold">
+                        {selectedPost.author.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
                     <div>
                       <p className="font-medium text-gray-900">{selectedPost.author.name}</p>
-                      <p className="text-sm text-gray-500">{selectedPost.author.bio}</p>
-                      <p className="text-xs text-gray-400">{new Date(selectedPost.publishDate).toLocaleDateString('tr-TR')}</p>
+                      <p className="text-xs text-gray-400">{formatDate(selectedPost.publishedAt || selectedPost.createdAt)}</p>
                     </div>
                   </div>
                   
@@ -842,9 +429,10 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
                       <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
-                      {selectedPost.comments}
+                      {selectedPost.views}
                     </div>
                   </div>
                 </div>
@@ -864,9 +452,10 @@ Supplement sihir değildir. %80 beslenme, %20 supplement!`,
 
               {/* Post Content */}
               <div className="prose prose-lg max-w-none mb-8">
-                <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-                  {selectedPost.content}
-                </div>
+                <div 
+                  className="text-gray-700 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                />
               </div>
 
               {/* Action Buttons */}

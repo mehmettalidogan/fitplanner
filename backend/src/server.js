@@ -7,6 +7,8 @@ const workoutRoutes = require('./routes/workoutRoutes');
 const nutritionRoutes = require('./routes/nutritionRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
 const newsletterRoutes = require('./routes/newsletterRoutes');
+const blogRoutes = require('./routes/blogRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -36,6 +38,8 @@ app.use('/api/workouts', workoutRoutes);
 app.use('/api/nutrition', nutritionRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/admin', adminRoutes);
 
 // MongoDB bağlantısı
 mongoose.connect(config.mongoURI, {

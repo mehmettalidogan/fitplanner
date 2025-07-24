@@ -13,6 +13,12 @@ import Nutrition from './pages/Nutrition';
 import About from './pages/About';
 import Blog from './pages/Blog';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import BlogForm from './pages/admin/BlogForm';
+import BlogManagement from './pages/admin/BlogManagement';
+import UserManagement from './pages/admin/UserManagement';
+import NewsletterManagement from './pages/admin/NewsletterManagement';
 import './App.css';
 
 const App: React.FC = () => {
@@ -67,6 +73,57 @@ const App: React.FC = () => {
               </PrivateRoute>
             }
           />
+          
+          {/* Admin Routes */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/blogs"
+            element={
+              <AdminRoute>
+                <BlogManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/blogs/new"
+            element={
+              <AdminRoute>
+                <BlogForm />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/blogs/edit/:id"
+            element={
+              <AdminRoute>
+                <BlogForm />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <UserManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/newsletter"
+            element={
+              <AdminRoute>
+                <NewsletterManagement />
+              </AdminRoute>
+            }
+          />
+          
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

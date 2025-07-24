@@ -1,10 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role?: 'user' | 'admin';
+  isAdmin?: boolean;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: any | null;
+  user: User | null;
   token: string | null;
-  login: (token: string, userData: any) => void;
+  isAdmin: boolean;
+  login: (token: string, userData: User) => void;
   logout: () => void;
 }
 
@@ -20,7 +29,7 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = (token: string, userData: any) => {
+  const login = (token: string, userData: User) => {
     localStorage.setItem('token', token);
     localStorage.setItem('userData', JSON.stringify(userData));
     setToken(token);
@@ -53,8 +62,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthenticated(false);
   };
 
+  // Admin kontrolü
+  const isAdmin = user?.isAdmin === true || user?.role === 'admin';
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, token, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, token, isAdmin, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

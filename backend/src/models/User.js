@@ -68,6 +68,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '/img/default-profile.png'
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  lastLogin: {
+    type: Date
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
   createdAt: {
     type: Date,
     default: Date.now

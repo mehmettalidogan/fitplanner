@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
+const adminMiddleware = require('../middleware/adminMiddleware');
 const {
   subscribe,
   unsubscribe,
@@ -17,7 +18,7 @@ router.get('/subscriber/:email', getSubscriber);
 router.put('/subscriber/:email/preferences', updatePreferences);
 
 // Admin routes (protected)
-router.get('/stats', authMiddleware, getStats);
-router.get('/subscribers', authMiddleware, getAllSubscribers);
+router.get('/stats', adminMiddleware, getStats);
+router.get('/subscribers', adminMiddleware, getAllSubscribers);
 
 module.exports = router; 

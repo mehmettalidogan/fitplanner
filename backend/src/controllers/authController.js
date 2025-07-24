@@ -54,11 +54,20 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Geçersiz e-posta veya şifre.' });
     }
 
+    // Aktif kullanıcı kontrolü
+    if (!user.isActive) {
+      return res.status(401).json({ message: 'Hesabınız deaktif durumda. Lütfen yönetici ile iletişime geçin.' });
+    }
+
     // Şifre kontrolü
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Geçersiz e-posta veya şifre.' });
     }
+
+    // Son giriş tarihini güncelle
+    user.lastLogin = new Date();
+    await user.save();
 
     // JWT token oluşturma
     const token = jwt.sign(
@@ -68,12 +77,17 @@ exports.login = async (req, res) => {
     );
 
     res.json({
+      success: true,
       token,
       user: {
         id: user._id,
         email: user.email,
-        name: user.name
-      }
+        name: user.name,
+        role: user.role,
+        isAdmin: user.role === 'admin',
+        lastLogin: user.lastLogin
+      },
+      message: user.role === 'admin' ? 'Admin girişi başarılı! Hoş geldiniz! 👑' : 'Giriş başarılı! Hoş geldiniz! 🎉'
     });
   } catch (error) {
     console.error('Giriş hatası:', error);
