@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import WorkoutForm from './pages/WorkoutForm';
 import NutritionForm from './pages/NutritionForm';
 import Preferences from './pages/Preferences';
+import Programs from './pages/Programs';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
@@ -19,6 +20,7 @@ const App: React.FC = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/programs" element={<Programs />} />
           <Route
             path="/dashboard"
             element={

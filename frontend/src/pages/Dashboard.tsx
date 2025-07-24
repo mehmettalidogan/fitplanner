@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { CalendarIcon, ScaleIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import axiosInstance from '../utils/axios';
 import UserProfile from '../components/UserProfile';
+import { useAuth } from '../context/AuthContext';
 
 interface MacroData {
   totalProtein: number;
@@ -55,7 +56,13 @@ interface UserData {
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
   const [userData, setUserData] = useState<UserData | null>(null);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   const [dailyMacros, setDailyMacros] = useState<MacroData>({
     totalProtein: 0,
     totalCarbs: 0,
@@ -128,6 +135,19 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-secondary-100 bg-cover bg-center bg-fixed bg-no-repeat" style={{ backgroundImage: `url(${process.env.PUBLIC_URL}/img/dashboard.png)` }}>
       <div className="min-h-screen bg-black/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header - Logout Button */}
+          <div className="flex justify-end mb-6">
+            <button
+              onClick={handleLogout}
+              className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Çıkış
+            </button>
+          </div>
+          
           {/* Hızlı Erişim Butonları */}
           <div className="flex gap-4 mb-8">
             <button
