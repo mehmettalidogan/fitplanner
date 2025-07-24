@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes');
 const workoutRoutes = require('./routes/workoutRoutes');
 const nutritionRoutes = require('./routes/nutritionRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
+const newsletterRoutes = require('./routes/newsletterRoutes');
 
 const app = express();
 
@@ -20,11 +21,21 @@ app.use(cors({
 // Middleware
 app.use(express.json());
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Server çalışıyor! 🚀',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/nutrition', nutritionRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 // MongoDB bağlantısı
 mongoose.connect(config.mongoURI, {

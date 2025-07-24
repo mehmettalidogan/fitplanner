@@ -9,6 +9,9 @@ import WorkoutForm from './pages/WorkoutForm';
 import NutritionForm from './pages/NutritionForm';
 import Preferences from './pages/Preferences';
 import Programs from './pages/Programs';
+import Nutrition from './pages/Nutrition';
+import About from './pages/About';
+import Blog from './pages/Blog';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
@@ -21,6 +24,9 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/programs" element={<Programs />} />
+          <Route path="/nutrition" element={<Nutrition />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/blog" element={<Blog />} />
           <Route
             path="/dashboard"
             element={
