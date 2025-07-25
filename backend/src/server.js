@@ -9,6 +9,9 @@ const recommendationRoutes = require('./routes/recommendationRoutes');
 const newsletterRoutes = require('./routes/newsletterRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+const securityRoutes = require('./routes/securityRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 
 const app = express();
 
@@ -40,6 +43,9 @@ app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api', searchRoutes);
+app.use('/api/security', securityRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // MongoDB bağlantısı
 mongoose.connect(config.mongoURI, {

@@ -80,6 +80,49 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  // Security fields
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailVerificationToken: {
+    type: String
+  },
+  emailVerificationExpires: {
+    type: Date
+  },
+  passwordResetToken: {
+    type: String
+  },
+  passwordResetExpires: {
+    type: Date
+  },
+  twoFactorAuth: {
+    enabled: {
+      type: Boolean,
+      default: false
+    },
+    secret: {
+      type: String
+    },
+    backupCodes: [{
+      code: String,
+      used: {
+        type: Boolean,
+        default: false
+      }
+    }]
+  },
+  securityPreferences: {
+    loginNotifications: {
+      type: Boolean,
+      default: true
+    },
+    securityEmails: {
+      type: Boolean,
+      default: true
+    }
+  },
   createdAt: {
     type: Date,
     default: Date.now

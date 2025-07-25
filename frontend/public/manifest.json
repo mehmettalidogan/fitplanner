@@ -1,11 +1,12 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "FitPlanner",
+  "name": "FitPlanner - Kişisel Fitness Planlayıcısı",
+  "description": "Kişiselleştirilmiş antrenman programları, beslenme takibi ve ilerleme analizi ile fitness hedeflerinize ulaşın.",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "img/fitlogo.png",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/png"
     },
     {
       "src": "logo192.png",
@@ -18,8 +19,49 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "tr",
+  "categories": ["health", "fitness", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "img/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "FitPlanner Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Yeni Antrenman",
+      "short_name": "Antrenman",
+      "description": "Hızlıca yeni bir antrenman kaydı oluştur",
+      "url": "/workout/new",
+      "icons": [{ "src": "img/fitlogo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Beslenme Takibi",
+      "short_name": "Beslenme",
+      "description": "Günlük beslenme kaydını güncelle",
+      "url": "/nutrition/new",
+      "icons": [{ "src": "img/fitlogo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "İlerleme",
+      "short_name": "İlerleme",
+      "description": "Fitness ilerlemenizi görüntüleyin",
+      "url": "/analytics",
+      "icons": [{ "src": "img/fitlogo.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }

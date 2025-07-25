@@ -2,12 +2,24 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
+import GlobalSearch from './GlobalSearch';
+import useKeyboardShortcuts from '../hooks/useKeyboardShortcuts';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    'cmd+k': () => setIsSearchOpen(true),
+    'escape': () => {
+      setIsSearchOpen(false);
+      setIsMenuOpen(false);
+    }
+  });
 
   const navigation = [
     { name: 'Ana Sayfa', href: '/' },
@@ -48,6 +60,17 @@ const Header: React.FC = () => {
 
           {/* Right Side Actions */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Search Button */}
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors group"
+              title="Ara (⌘K)"
+            >
+              <svg className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+            
             <DarkModeToggle />
             
             {user ? (
@@ -82,6 +105,14 @@ const Header: React.FC = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 p-2 transition-colors duration-200"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
             <DarkModeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -148,6 +179,12 @@ const Header: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Global Search Modal */}
+      <GlobalSearch 
+        isOpen={isSearchOpen} 
+        onClose={() => setIsSearchOpen(false)} 
+      />
     </header>
   );
 };

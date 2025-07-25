@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { CalendarIcon, ScaleIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import axiosInstance from '../utils/axios';
 import UserProfile from '../components/UserProfile';
+import WeightTracker from '../components/WeightTracker';
 import { useAuth } from '../context/AuthContext';
 
 interface MacroData {
@@ -190,12 +191,10 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Kullanıcı Profili */}
-            {userData && (
-              <div className="lg:col-span-3">
-                <UserProfile user={userData} onProfileUpdate={fetchData} />
-              </div>
-            )}
+            {/* Kullanıcı Profili - Artık props gerektirmiyor */}
+            <div className="lg:col-span-3">
+              <UserProfile />
+            </div>
 
             {/* Haftalık Antrenman Programı */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300 lg:col-span-2">

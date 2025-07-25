@@ -25,6 +25,7 @@ import BlogManagement from './pages/admin/BlogManagement';
 import UserManagement from './pages/admin/UserManagement';
 import NewsletterManagement from './pages/admin/NewsletterManagement';
 import UserProfile from './components/UserProfile';
+import SecuritySettings from './components/SecuritySettings';
 import './App.css';
 
 const App: React.FC = () => {
@@ -89,6 +90,18 @@ const App: React.FC = () => {
               element={
                 <PrivateRoute>
                   <UserProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/security"
+              element={
+                <PrivateRoute>
+                  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 pb-16">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                      <SecuritySettings />
+                    </div>
+                  </div>
                 </PrivateRoute>
               }
             />
