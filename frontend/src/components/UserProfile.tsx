@@ -17,7 +17,11 @@ interface UserProfileData {
   profilePhoto: string | null;
 }
 
-const UserProfile: React.FC = () => {
+interface UserProfileProps {
+  showHeader?: boolean;
+}
+
+const UserProfile: React.FC<UserProfileProps> = ({ showHeader = true }) => {
   const { user } = useAuth();
   const [profileData, setProfileData] = useState<UserProfileData>({
     name: user?.name || '',
@@ -126,9 +130,9 @@ const UserProfile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header />
+      {showHeader && <Header />}
       
-      <div className="pt-20 pb-16">
+      <div className={`${showHeader ? 'pt-20' : 'pt-0'} pb-16`}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
             
