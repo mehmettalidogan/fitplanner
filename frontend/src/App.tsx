@@ -24,6 +24,7 @@ import BlogForm from './pages/admin/BlogForm';
 import BlogManagement from './pages/admin/BlogManagement';
 import UserManagement from './pages/admin/UserManagement';
 import NewsletterManagement from './pages/admin/NewsletterManagement';
+import UserProfile from './components/UserProfile';
 import './App.css';
 
 const App: React.FC = () => {
@@ -80,6 +81,14 @@ const App: React.FC = () => {
               element={
                 <PrivateRoute>
                   <Preferences />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <UserProfile />
                 </PrivateRoute>
               }
             />
