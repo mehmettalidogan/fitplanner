@@ -224,6 +224,16 @@ const Login: React.FC = () => {
                 Hemen Kayıt Olun
               </button>
             </p>
+            <p className="text-sm text-gray-600 mt-2">
+              Şifrenizi mi unuttunuz?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200"
+              >
+                Şifremi Unuttum
+              </button>
+            </p>
           </div>
         </form>
       </div>
