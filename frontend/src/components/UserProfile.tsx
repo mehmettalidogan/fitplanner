@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import ProfilePhotoUpload from './ProfilePhotoUpload';
+import axiosInstance from '../utils/axios';
 
 interface UserProfileData {
   name: string;
@@ -37,8 +38,38 @@ const UserProfile: React.FC<UserProfileProps> = ({ showHeader = true }) => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+
+  // Profil verilerini backend'den çek
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await axiosInstance.get('/api/auth/profile');
+        const userData = response.data;
+        
+        setProfileData({
+          name: userData.name || '',
+          email: userData.email || '',
+          phone: userData.phone || '',
+          age: userData.age || 25,
+          gender: userData.gender || '',
+          height: userData.height || 170,
+          weight: userData.weight || 70,
+          activityLevel: userData.activityLevel || 'moderately_active',
+          goals: userData.goal ? [userData.goal] : [],
+          profilePhoto: userData.profileImage || null,
+        });
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+      } finally {
+        setDataLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
 
   const goalOptions = [
     { id: 'weight_loss', label: 'Kilo Vermek' },
@@ -100,13 +131,34 @@ const UserProfile: React.FC<UserProfileProps> = ({ showHeader = true }) => {
     setSuccess('');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Real API call
+      const updateData = {
+        name: profileData.name,
+        age: profileData.age,
+        gender: profileData.gender,
+        height: profileData.height,
+        weight: profileData.weight,
+        activityLevel: profileData.activityLevel,
+        goal: profileData.goals.length > 0 ? profileData.goals[0] : undefined,
+        profileImage: profileData.profilePhoto
+      };
+
+      const response = await axiosInstance.put('/api/auth/profile', updateData);
+      const updatedUser = response.data;
       
       setSuccess('Profil başarıyla güncellendi!');
       setIsEditing(false);
-    } catch (err) {
-      setError('Profil güncellenirken bir hata oluştu');
+      
+      // Profil verilerini güncelle
+      setProfileData(prev => ({
+        ...prev,
+        ...updatedUser
+      }));
+      
+    } catch (err: any) {
+      console.error('Profile update error:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'Profil güncellenirken bir hata oluştu';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -127,6 +179,14 @@ const UserProfile: React.FC<UserProfileProps> = ({ showHeader = true }) => {
 
   const bmi = parseFloat(calculateBMI());
   const bmiInfo = getBMICategory(bmi);
+
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-lg text-primary-600">Profil bilgileri yükleniyor...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

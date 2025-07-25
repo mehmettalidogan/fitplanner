@@ -113,7 +113,7 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const updates = req.body;
-    const allowedUpdates = ['age', 'gender', 'height', 'weight', 'goal', 'activityLevel'];
+    const allowedUpdates = ['age', 'gender', 'height', 'weight', 'goal', 'activityLevel', 'profileImage', 'name'];
     
     // Sadece izin verilen alanların güncellenmesi
     const filteredUpdates = Object.keys(updates)
