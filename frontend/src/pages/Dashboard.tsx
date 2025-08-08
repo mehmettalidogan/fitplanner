@@ -4,7 +4,6 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { CalendarIcon, ScaleIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import axiosInstance from '../utils/axios';
 import UserProfile from '../components/UserProfile';
-import WeightTracker from '../components/WeightTracker';
 import { useAuth } from '../context/AuthContext';
 
 interface MacroData {
@@ -114,7 +113,7 @@ const Dashboard: React.FC = () => {
       // State'i temizle
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state, fetchData, navigate]);
+  }, [location.state, location.pathname, fetchData, navigate]);
 
   if (loading) {
     return (
@@ -150,54 +149,54 @@ const Dashboard: React.FC = () => {
           </div>
           
           {/* Hızlı Erişim Butonları */}
-          <div className="flex gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
             <button
               onClick={() => navigate('/workout/new')}
-              className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex items-center justify-center px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Antrenman Ekle
+              <span className="text-sm md:text-base">Antrenman Ekle</span>
             </button>
             <button
               onClick={() => navigate('/nutrition/new')}
-              className="flex items-center px-4 py-2 bg-action-yellow-600 text-white rounded-lg hover:bg-action-yellow-700 focus:outline-none focus:ring-2 focus:ring-action-yellow-500"
+              className="flex items-center justify-center px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-200"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Öğün Ekle
+              <span className="text-sm md:text-base">Öğün Ekle</span>
             </button>
             <button
               onClick={() => navigate('/blog')}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
               </svg>
-              Blog
+              <span className="text-sm md:text-base">Blog</span>
             </button>
             <button
               onClick={() => navigate('/preferences')}
-              className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 ml-auto"
+              className="flex items-center justify-center px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-200"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              Tercihler ve Öneriler
+              <span className="text-sm md:text-base">Tercihler</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             {/* Kullanıcı Profili - Artık props gerektirmiyor */}
             <div className="lg:col-span-3">
               <UserProfile showHeader={false} />
             </div>
 
             {/* Haftalık Antrenman Programı */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow duration-300 lg:col-span-2">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 md:p-6 hover:shadow-lg transition-shadow duration-300 lg:col-span-2">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-primary-100 rounded-lg">

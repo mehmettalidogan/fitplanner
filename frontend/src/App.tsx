@@ -1,39 +1,52 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
-import LandingPage from './pages/LandingPage';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import WorkoutForm from './pages/WorkoutForm';
-import NutritionForm from './pages/NutritionForm';
-import Preferences from './pages/Preferences';
-import Programs from './pages/Programs';
-import Nutrition from './pages/Nutrition';
-import About from './pages/About';
-import Blog from './pages/Blog';
-import Contact from './pages/Contact';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsOfService from './pages/TermsOfService';
-import ForgotPassword from './pages/ForgotPassword';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import BlogForm from './pages/admin/BlogForm';
-import BlogManagement from './pages/admin/BlogManagement';
-import UserManagement from './pages/admin/UserManagement';
-import NewsletterManagement from './pages/admin/NewsletterManagement';
-import UserProfile from './components/UserProfile';
-import SecuritySettings from './components/SecuritySettings';
 import './App.css';
+
+// Lazy load components for better performance
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const Login = React.lazy(() => import('./pages/Login'));
+const Register = React.lazy(() => import('./pages/Register'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const WorkoutForm = React.lazy(() => import('./pages/WorkoutForm'));
+const NutritionForm = React.lazy(() => import('./pages/NutritionForm'));
+const Preferences = React.lazy(() => import('./pages/Preferences'));
+const Programs = React.lazy(() => import('./pages/Programs'));
+const Nutrition = React.lazy(() => import('./pages/Nutrition'));
+const About = React.lazy(() => import('./pages/About'));
+const Blog = React.lazy(() => import('./pages/Blog'));
+const Contact = React.lazy(() => import('./pages/Contact'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = React.lazy(() => import('./pages/TermsOfService'));
+const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
+const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
+const BlogForm = React.lazy(() => import('./pages/admin/BlogForm'));
+const BlogManagement = React.lazy(() => import('./pages/admin/BlogManagement'));
+const UserManagement = React.lazy(() => import('./pages/admin/UserManagement'));
+const NewsletterManagement = React.lazy(() => import('./pages/admin/NewsletterManagement'));
+const UserProfile = React.lazy(() => import('./components/UserProfile'));
+const SecuritySettings = React.lazy(() => import('./components/SecuritySettings'));
+
+// Loading component
+const LoadingSpinner: React.FC = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+      <p className="text-gray-600 dark:text-gray-400">Yükleniyor...</p>
+    </div>
+  </div>
+);
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
       <ThemeProvider>
         <Router>
-          <Routes>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -157,7 +170,8 @@ const App: React.FC = () => {
             />
             
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+            </Routes>
+          </Suspense>
         </Router>
       </ThemeProvider>
     </AuthProvider>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axiosInstance from '../utils/axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -73,7 +73,7 @@ const SecuritySettings: React.FC = () => {
   };
 
   // Mock data fallback
-  const mockSecurityLogs: SecurityLog[] = [
+  const mockSecurityLogs = useCallback((): SecurityLog[] => [
     {
       id: '1',
       action: 'Başarılı giriş',
@@ -92,11 +92,11 @@ const SecuritySettings: React.FC = () => {
       location: 'Unknown',
       status: 'failed'
     }
-  ];
+  ], []);
 
   useEffect(() => {
-    setSecurityLogs(mockSecurityLogs);
-  }, []);
+    setSecurityLogs(mockSecurityLogs());
+  }, [mockSecurityLogs]);
 
   const handleSendVerificationEmail = async () => {
     setLoading(true);
@@ -329,7 +329,7 @@ const SecuritySettings: React.FC = () => {
 
                 <div className="flex space-x-3">
                   <button
-                    onClick={handleEnable2FA}
+                    onClick={handleVerify2FA}
                     disabled={loading || verificationCode.length !== 6}
                     className="btn-primary disabled:opacity-50"
                   >

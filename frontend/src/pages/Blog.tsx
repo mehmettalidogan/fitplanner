@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
 import NewsletterSubscription from '../components/NewsletterSubscription';
 import axiosInstance from '../utils/axios';
@@ -43,11 +43,7 @@ const Blog: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchBlogPosts();
-  }, [selectedCategory, searchTerm]);
-
-  const fetchBlogPosts = async () => {
+  const fetchBlogPosts = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -68,7 +64,11 @@ const Blog: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, searchTerm]);
+
+  useEffect(() => {
+    fetchBlogPosts();
+  }, [selectedCategory, searchTerm, fetchBlogPosts]);
 
   const openPostDetail = (post: BlogPost) => {
     setSelectedPost(post);

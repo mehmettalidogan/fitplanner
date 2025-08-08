@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import axiosInstance from '../../utils/axios';
@@ -56,11 +56,7 @@ const BlogManagement: React.FC = () => {
     { value: 'archived', label: '📦 Arşivlenmiş' }
   ];
 
-  useEffect(() => {
-    fetchBlogs();
-  }, [filters, pagination.page]);
-
-  const fetchBlogs = async () => {
+  const fetchBlogs = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -87,7 +83,11 @@ const BlogManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, pagination.page, pagination.limit]);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, [filters, pagination.page, fetchBlogs]);
 
   const handleStatusChange = async (blogId: string, newStatus: string) => {
     try {

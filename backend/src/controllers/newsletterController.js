@@ -1,4 +1,5 @@
 const Newsletter = require('../models/Newsletter');
+const emailService = require('../services/emailService');
 
 // Newsletter subscription
 exports.subscribe = async (req, res) => {
@@ -62,6 +63,10 @@ exports.subscribe = async (req, res) => {
     });
 
     await newSubscriber.save();
+
+    // Send welcome email in background (don't wait for it)
+    emailService.sendWelcomeEmail(newSubscriber.email, newSubscriber.name)
+      .catch(error => console.error('Welcome email failed:', error));
 
     // Success response
     res.status(201).json({
@@ -266,13 +271,29 @@ exports.getAllSubscribers = async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    const subscribers = await Newsletter.find({ isActive: true })
+    const filters = { isActive: true };
+    
+    // Add search functionality
+    if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, 'i');
+      filters.$or = [
+        { email: searchRegex },
+        { name: searchRegex }
+      ];
+    }
+
+    // Add source filter
+    if (req.query.source) {
+      filters.source = req.query.source;
+    }
+
+    const subscribers = await Newsletter.find(filters)
       .sort({ subscribedAt: -1 })
       .skip(skip)
       .limit(limit)
       .select('-metadata');
 
-    const total = await Newsletter.countDocuments({ isActive: true });
+    const total = await Newsletter.countDocuments(filters);
 
     res.json({
       success: true,
@@ -290,6 +311,79 @@ exports.getAllSubscribers = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Abone listesi alınırken hata oluştu.'
+    });
+  }
+};
+
+// Send newsletter to all active subscribers (admin only)
+exports.sendNewsletter = async (req, res) => {
+  try {
+    const { subject, content } = req.body;
+
+    if (!subject || !content) {
+      return res.status(400).json({
+        success: false,
+        message: 'Konu ve içerik alanları gereklidir.'
+      });
+    }
+
+    // Get all active subscribers
+    const subscribers = await Newsletter.find({ isActive: true })
+      .select('email name');
+
+    if (subscribers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Aktif abone bulunamadı.'
+      });
+    }
+
+    // Send newsletter in background
+    emailService.sendNewsletter(subject, content, subscribers)
+      .then(result => {
+        console.log(`Newsletter sent: ${result.totalSent} successful, ${result.totalFailed} failed`);
+      })
+      .catch(error => {
+        console.error('Newsletter sending failed:', error);
+      });
+
+    res.json({
+      success: true,
+      message: `Newsletter ${subscribers.length} aboneye gönderilmeye başlandı! 📧`,
+      subscriberCount: subscribers.length
+    });
+
+  } catch (error) {
+    console.error('Send newsletter error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Newsletter gönderimi sırasında hata oluştu.'
+    });
+  }
+};
+
+// Test email service (admin only)
+exports.testEmailService = async (req, res) => {
+  try {
+    const result = await emailService.testConnection();
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Email servisi çalışıyor! ✅'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Email servisi çalışmıyor! ❌',
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Email test error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Email servisi testi sırasında hata oluştu.'
     });
   }
 }; 

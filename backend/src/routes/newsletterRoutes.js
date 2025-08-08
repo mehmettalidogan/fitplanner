@@ -8,7 +8,9 @@ const {
   getSubscriber,
   updatePreferences,
   getStats,
-  getAllSubscribers
+  getAllSubscribers,
+  sendNewsletter,
+  testEmailService
 } = require('../controllers/newsletterController');
 
 // Public routes
@@ -20,5 +22,7 @@ router.put('/subscriber/:email/preferences', updatePreferences);
 // Admin routes (protected)
 router.get('/stats', adminMiddleware, getStats);
 router.get('/subscribers', adminMiddleware, getAllSubscribers);
+router.post('/send', adminMiddleware, sendNewsletter);
+router.get('/test-email', adminMiddleware, testEmailService);
 
 module.exports = router; 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import axiosInstance from '../../utils/axios';
 
@@ -59,11 +59,7 @@ const UserManagement: React.FC = () => {
     'ekstra_aktif': '⚡ Ekstra Aktif'
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, [filters, pagination.page]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -90,7 +86,11 @@ const UserManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, pagination.page, pagination.limit]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [filters, pagination.page, fetchUsers]);
 
   const handleToggleStatus = async (userId: string) => {
     try {

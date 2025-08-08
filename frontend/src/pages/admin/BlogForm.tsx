@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BlogEditor from '../../components/BlogEditor';
@@ -55,13 +55,7 @@ const BlogForm: React.FC = () => {
     { value: 'genel', label: '📝 Genel' }
   ];
 
-  useEffect(() => {
-    if (isEditing) {
-      fetchBlog();
-    }
-  }, [id, isEditing]);
-
-  const fetchBlog = async () => {
+  const fetchBlog = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get(`/api/blog/admin/${id}`);
@@ -90,7 +84,13 @@ const BlogForm: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (isEditing) {
+      fetchBlog();
+    }
+  }, [id, isEditing, fetchBlog]);
 
   const handleInputChange = (field: string, value: any) => {
     if (field.startsWith('seo.')) {

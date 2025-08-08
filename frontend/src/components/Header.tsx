@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DarkModeToggle from './DarkModeToggle';
 import GlobalSearch from './GlobalSearch';
@@ -9,7 +9,6 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const navigate = useNavigate();
   const { user } = useAuth();
 
   // Keyboard shortcuts

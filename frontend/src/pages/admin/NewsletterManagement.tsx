@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import axiosInstance from '../../utils/axios';
 
@@ -55,11 +55,7 @@ const NewsletterManagement: React.FC = () => {
     { value: 'false', label: '❌ Pasif' }
   ];
 
-  useEffect(() => {
-    fetchData();
-  }, [filters, pagination.page]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -96,7 +92,11 @@ const NewsletterManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, pagination.page, pagination.limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [filters, pagination.page, fetchData]);
 
   const handleUnsubscribe = async (email: string) => {
     const confirmed = window.confirm('Bu aboneyi listeden çıkarmak istediğinizden emin misiniz?');
